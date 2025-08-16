@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khusue Mursub Vanzz</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #111; color: #fff; text-align: center; padding: 20px; }
+  .container { max-width: 400px; margin: auto; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; }
+  input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: none; }
+  .row { display: flex; }
+  .row input:first-child { flex: 1; border-radius: 5px 0 0 5px; }
+  .suffix { background: #333; padding: 10px; border-radius: 0 5px 5px 0; color: gold; }
+  button { width: 100%; padding: 10px; margin-top: 10px; background: gold; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  button:hover { background: orange; }
+  .loading { display: none; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="container" id="formPage">
+  <h2>Create subdomain</h2>
+  <div class="row">
+    <input type="text" id="subdomain" placeholder="subdomain" required>
+    <div class="suffix">.samphost.online</div>
+  </div>
+  <input type="text" id="ip" placeholder="IPv4" required>
+  <button onclick="createSubdomain()">Buat</button>
+  <div class="loading" id="loading">Memproses...</div>
+</div>
+
+<div class="container" id="successPage" style="display:none;">
+  <h2>✅  MURID VANZZ ANTI GAGAL
+  <p id="fullSubdomain"></p>
+  <p id="fullIP"></p>
+  <button onclick="goBack()">Buat Lagi</button>
+</div>
+
+<div class="container" id="errorPage" style="display:none;">
+  <h2>❌ Gagal Membuat Subdomain</h2>
+  <p id="errorMessage"></p>
+  <button onclick="goBack()">Kembali</button>
+</div>
+
+<script>
+async function createSubdomain(){
+  const sub = document.getElementById("subdomain").value.trim();
+  const ip = document.getElementById("ip").value.trim();
+  if(!sub || !ip){ alert("Isi semua field!"); return; }
+
+  document.getElementById("loading").style.display = "block";
+
+  try {
+    const res = await fetch("/api/create-subdomain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subdomain: sub, ip })
+    });
+    const data = await res.json();
+    document.getElementById("loading").style.display = "none";
+
+    if(data.ok){
+      document.getElementById("formPage").style.display = "none";
+      document.getElementById("successPage").style.display = "block";
+      document.getElementById("fullSubdomain").innerText = data.subdomain;
+      document.getElementById("fullIP").innerText = data.ip;
+    } else {
+      document.getElementById("formPage").style.display = "none";
+      document.getElementById("errorPage").style.display = "block";
+      document.getElementById("errorMessage").innerText = data.error || "Gagal";
+    }
+  } catch (err) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("formPage").style.display = "none";
+    document.getElementById("errorPage").style.display = "block";
+    document.getElementById("errorMessage").innerText = "Terjadi kesalahan koneksi";
+  }
+}
+
+function goBack(){
+  document.getElementById("formPage").style.display = "block";
+  document.getElementById("successPage").style.display = "none";
+  document.getElementById("errorPage").style.display = "none";
+  document.getElementById("subdomain").value = "";
+  document.getElementById("ip").value = "";
+}
+</script>
+
+</body>
+  </html>
